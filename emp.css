@@ -1,0 +1,10 @@
+table,tr, td
+{
+border: solid black;
+width: auto;
+text-align: center;
+}
+table { margin: auto; }
+h1{
+    text-align: center;
+}
