@@ -1,11 +1,11 @@
 //creating all the instances of the elements to be used
 let body=document.querySelector("body");
 let s="input";
-let empid=createDOMElement(s),name=createDOMElement(s),department=createDOMElement(s),phone=createDOMElement(s),email=createDOMElement(s),loc=createDOMElement(s),manager;
+let empid=createDOMElement(s),name=createDOMElement(s),department,phone=createDOMElement(s),email=createDOMElement(s),loc=createDOMElement(s),manager;
 let index,children,pointer=1,idToDelete=idToUpdate=-1;
-let indexArray = localStorage.getItem('indices') ? JSON.parse(localStorage.getItem('indices')) : [];
-localStorage.setItem('indices', JSON.stringify(indexArray));
-let data = JSON.parse(localStorage.getItem('indices'));
+let indexArray = localStorage.getItem('APindex') ? JSON.parse(localStorage.getItem('APindex')) : [];
+localStorage.setItem('APindex', JSON.stringify(indexArray));
+let data = JSON.parse(localStorage.getItem('APindex'));
 let space=createDOMElement("br"),horizontalBreak=createDOMElement("hr");
 let heading=createDOMElement("h1","Employee Details Form"), heading3=createDOMElement("h3","Please add the details below");
 body.appendChild(heading);body.appendChild(horizontalBreak.cloneNode(true));body.appendChild(heading3);
@@ -63,20 +63,19 @@ function setAndAppend(variable,label,typeArray,valueArray){         //function t
     detailsForm.appendChild(space.cloneNode(true));
 }
 
-function managerDropDown() {            //function to create a dropdown menu for manager's name
+function dropDown(label,classValue,arr) {            //function to create a dropdown menu for manager's name
     labelValue=createDOMElement("label");
-    labelValue.innerHTML="Employee's Manager:";
+    labelValue.innerHTML="Employee "+label+":";
     divElement=createDOMElement("div");
-    manager = document.createElement("SELECT");
-    manager.setAttribute("class", "managerSelect");
-    let arr=["Samuel","John","Joe"]     //array of managers names
+    selectOption = document.createElement("SELECT");
+    selectOption.setAttribute("class", classValue);
     for(i=0;i<arr.length;i++){
     let differentOptions = document.createElement("option");
     differentOptions.setAttribute("value", arr[i]);
     differentOptions.innerHTML=arr[i];
-    manager.appendChild(differentOptions);
+    selectOption.appendChild(differentOptions);
     divElement.appendChild(labelValue);
-    divElement.appendChild(manager);
+    divElement.appendChild(selectOption);
     detailsForm.appendChild(divElement);
   }
   detailsForm.appendChild(space.cloneNode(true));
@@ -85,32 +84,43 @@ function managerDropDown() {            //function to create a dropdown menu for
 
 setAndAppend(empid,"Employee ID:",["type","placeholder","name"],["text","Employee ID","empid"]);
 setAndAppend(name,"Employee Name:",["type","placeholder","name"],["text","Name","empname"]);
-setAndAppend(department,"Employee department:",["type","placeholder","name"],["text","Department","department"]);
+dropDown("Department","departmentSelect",["Development","Testing","Support","Management","Staff"]);
 setAndAppend(phone,"Employee Phone:",["type","placeholder","name"],["tel","Phone number","phone"]);
 setAndAppend(email,"Employee Email:",["type","placeholder","name"],["email","Email ID","email"]);
-managerDropDown();
+dropDown("Manager","managerSelect",["Samuel","John","Joe"]);
 setAndAppend(loc,"Employee's Location:",["type","placeholder","name"],["text","Location","location"]);
 
+department=document.querySelector(".departmentSelect");
+manager=document.querySelector(".managerSelect")
 
-function findIndex(){                   //function to find the next index at which the details are supposed to be stored. This index is added to the indices array
-    data = JSON.parse(localStorage.getItem('indices'));
+function findIndex(){                   //function to find the next index at which the details are supposed to be stored. This index is added to the APindex array
+    data = JSON.parse(localStorage.getItem('APindex'));
     if(data.length!==0){
     index = data[data.length-1]+1;
     indexArray.push(index);
-    localStorage.setItem('indices', JSON.stringify(indexArray));
+    localStorage.setItem('APindex', JSON.stringify(indexArray));
     return index;
     }
     else{
         index=0;
         indexArray.push(index);
-        localStorage.setItem('indices', JSON.stringify(indexArray));
+        localStorage.setItem('APindex', JSON.stringify(indexArray));
         return index;
     }
+}
+
+function getKey(indexValue){    //change the key value in loaclStorage so that it is not easy mutable 
+    let key;
+    indexValue<10?key="AP00"+indexValue:(indexValue<100?key="AP0"+indexValue:key="AP"+indexValue);
+    return key;
 }
 
 function addEmployee(){             //function to add the employee details to localStorage
     if(headingsPresent==false){
         createTableHeadings(tableHeadings);
+    }
+    if(table.style.visibility=="hidden"){
+        table.style.visibility="visible";
     }
     proceed=validate();
     if(proceed==true){
@@ -124,7 +134,8 @@ function addEmployee(){             //function to add the employee details to lo
         loc:loc.value
     }
     index=findIndex();
-    localStorage.setItem(index,JSON.stringify(obj1));
+    key=getKey(index);
+    localStorage.setItem(key,JSON.stringify(obj1));
     display(index);             //function call to display the details of employee present at the current index
     clearForm();
     }
@@ -143,12 +154,7 @@ function validate(){            //function to validate all the input fields of t
         name.focus();
         return false;
     }
-    if(department.value =="")
-    {
-        alert( "Please Enter Department name" );
-        department.focus();
-        return false;
-    }
+
     if(phone.value ==""||isNaN(phone.value)||phone.value.length<10||phone.value.length>10)
     {
         alert( "Please Enter a valid 10 digit Phone Number!" );
@@ -161,12 +167,7 @@ function validate(){            //function to validate all the input fields of t
         email.focus();
         return false;
     }
-    if(manager.value =="")
-    {
-        alert( "Please Enter Employee's Manager name!" );
-        manager.focus();
-        return false;
-    }
+
     if(loc.value =="")
     {
         alert( "Please Enter Employee's Location!" );
@@ -178,7 +179,8 @@ function validate(){            //function to validate all the input fields of t
 
 function display(itr){              //function to display the details of the employee at the particular index
     let fetchObject;
-    fetchObject=JSON.parse(localStorage.getItem(itr));
+    key=getKey(itr);
+    fetchObject=JSON.parse(localStorage.getItem(key));
     row=table.insertRow(pointer);
     pointer+=1;
     row.setAttribute('id',itr);
@@ -211,8 +213,9 @@ function update(){              //function to update the details edited in the p
     proceed=validate();
     if(proceed==true){
     buttonAU.removeEventListener('click',update);
+    key=getKey(idToUpdate);
     let rowChildren = document.querySelector('.detailsTable').tBodies[0].children.namedItem(idToUpdate).children;
-    let objToUpdate=JSON.parse(localStorage.getItem(idToUpdate));
+    let objToUpdate=JSON.parse(localStorage.getItem(key));
     rowChildren[0].innerHTML=objToUpdate.id=empid.value;
     rowChildren[1].innerHTML=objToUpdate.name=name.value;
     rowChildren[2].innerHTML=objToUpdate.dept=department.value;
@@ -220,22 +223,23 @@ function update(){              //function to update the details edited in the p
     rowChildren[4].innerHTML=objToUpdate.email=email.value;
     rowChildren[5].innerHTML=objToUpdate.manager=manager.value;
     rowChildren[6].innerHTML=objToUpdate.loc=loc.value;
-    localStorage.setItem(idToUpdate,JSON.stringify(objToUpdate));
+    localStorage.setItem(key,JSON.stringify(objToUpdate));
     buttonAU.addEventListener('click',addEmployee);
     clearForm();
     }
 }
 function remove(ele) {          //function to remove the individual employee details, based on the "delete" button clicked
-    data = JSON.parse(localStorage.getItem('indices'));
+    data = JSON.parse(localStorage.getItem('APindex'));
     idToDelete = ele.parentElement.parentElement.id;
-    ele.parentElement.parentElement.remove()
-    localStorage.removeItem(idToDelete);
-    indexArray = JSON.parse(localStorage.getItem('indices'));
+    ele.parentElement.parentElement.remove();
+    key=getKey(idToDelete);
+    localStorage.removeItem(key);
+    indexArray = JSON.parse(localStorage.getItem('APindex'));
     deleteIndex = data.indexOf(parseInt(idToDelete));
     if (deleteIndex > -1) {
         indexArray.splice(deleteIndex, 1);
     }
-    localStorage.setItem("indices",JSON.stringify(indexArray));
+    localStorage.setItem("APindex",JSON.stringify(indexArray));
     pointer-=1;
     if(indexArray.length==0){
         //table.deleteRow(0);
@@ -246,7 +250,7 @@ function clearForm(){       //function to clear the input fields
     detailsForm.reset(); 
     buttonAU.textContent="Add";
 }
-data = JSON.parse(localStorage.getItem('indices'));
+data = JSON.parse(localStorage.getItem('APindex'));
 if(data.length!=0){             //condition to check before populating the table
     if(headingsPresent==false){
         createTableHeadings(tableHeadings);
