@@ -109,7 +109,7 @@ function findIndex(){                   //function to find the next index at whi
     }
 }
 
-function getKey(indexValue){    //change the key value in loaclStorage so that it is not easy mutable 
+function getKey(indexValue){    //change the key value in localStorage so that it is not easily mutable 
     let key;
     indexValue<10?key="AP00"+indexValue:(indexValue<100?key="AP0"+indexValue:key="AP"+indexValue);
     return key;
