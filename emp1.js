@@ -63,7 +63,7 @@ function setAndAppend(variable,label,typeArray,valueArray){         //function t
     detailsForm.appendChild(space.cloneNode(true));
 }
 
-function dropDown(label,classValue,arr) {            //function to create a dropdown menu for manager's name
+function dropDown(label,classValue,arr) {            //function to create a dropdown menu
     labelValue=createDOMElement("label");
     labelValue.innerHTML="Employee "+label+":";
     divElement=createDOMElement("div");
