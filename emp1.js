@@ -67,10 +67,10 @@ function dropDown(label,classValue,arr) {            //function to create a drop
     labelValue=createDOMElement("label");
     labelValue.innerHTML="Employee "+label+":";
     divElement=createDOMElement("div");
-    selectOption = document.createElement("SELECT");
+    selectOption = createDOMElement("SELECT");
     selectOption.setAttribute("class", classValue);
     for(i=0;i<arr.length;i++){
-    let differentOptions = document.createElement("option");
+    let differentOptions = createDOMElement("option");
     differentOptions.setAttribute("value", arr[i]);
     differentOptions.innerHTML=arr[i];
     selectOption.appendChild(differentOptions);
